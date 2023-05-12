@@ -1,5 +1,5 @@
 
-all: cump_mp cump_cu cump_both_nvhpc # cump_both_clang15
+all: cump_mp cump_cu cump_both_nvhpc
 
 
 cump_mp: main.cpp
@@ -9,7 +9,15 @@ cump_cu: main.cpp
 	nvcc -g -G --generate-code=arch=compute_75,code=[compute_75,sm_75] -DCUMP_USE_CUDA -x cu main.cpp -o cump_cu
 
 cump_both_nvhpc: main.cpp
-	nvcc -g -G --generate-code=arch=compute_75,code=[compute_75,sm_75]  -lcuda -lcudart -lcudadevrt -ccbin=`which nvc++` -DCUMP_USE_OPENMP -DCUMP_USE_CUDA -Xcompiler -g,-Mcuda,-mp=gpu,-gpu=cc75,-Minfo=mp,-lcuda,-lcudart,-lcudadevrt,-Mcuda,-pgf90libs -Xlinker -lcuda,-lcudart,-lcudadevrt -x cu main.cpp -o cump_both_nvhpc
+	nvc++ -cuda -DCUMP_USE_OPENMP -DCUMP_USE_CUDA -g -mp=gpu -gpu=cc75 -Minfo=mp main.cpp -o cump_both_nvhpc
 
-#cump_both_clang15: main.cu
+# this links but crashes because nvcc and nvc++ have different/mutually exclusive initialization methods
+#	nvcc -g -G -rdc=true --generate-code=arch=compute_75,code=[compute_75,sm_75]  -lcuda -lcudart -lcudadevrt -ccbin=`which nvc++` -DCUMP_USE_OPENMP -DCUMP_USE_CUDA -Xcompiler -g,-Mcuda,-mp=gpu,-gpu=cc75,-Minfo=mp,-lcuda,-lcudart,-lcudadevrt,-Mcuda,-pgf90libs -Xlinker -lcuda,-lcudart,-lcudadevrt -x cu main.cpp -o cump_both_nvhpc
+
+# clang-15 is incompatible with CUDA 12. Clang 17 is, but it links in the clang-15 system install. to move forward on this I will have to unistall clang-15 completely.
+#cump_both_clang15: main.cpp
 #	nvcc -allow-unsupported-compiler -g -G --generate-code=arch=compute_75,code=[compute_75,sm_75]  -lcuda -lcudart -lcudadevrt -ccbin=`which clang++-15` -DCUMP_USE_OPENMP -DCUMP_USE_CUDA -Xcompiler -g,-fopenmp,--offload-arch=sm_75 main.cu -o cump_both_clang15
+
+# compiles and links but crashes at runtime. it may be due to my system installed gcc being built with a different version of cuda??
+#cump_both_gcc: main.cpp
+#	nvcc -g -G --generate-code=arch=compute_75,code=[compute_75,sm_75]  -lcuda -lcudart -lcudadevrt -DCUMP_USE_OPENMP -DCUMP_USE_CUDA -Xcompiler -g,-fopenmp,-foffload=nvptx-none,--offload-options=nvptx-none=-march=sm_75 -x cu main.cpp -o cump_both_gcc
