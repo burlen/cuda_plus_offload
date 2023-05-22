@@ -1,32 +1,25 @@
-#include <omp.h>
+#include <cstddef>
 
 template <typename T>
-T *alloc_omp(size_t n)
-{
-    int dev = omp_get_default_device();
-    T *ptr = (T*)omp_target_alloc(n*sizeof(T), dev);
-    return ptr;
-}
+T *alloc_omp(size_t n);
 
 template <typename T>
-void init_omp(T *ptr, size_t n, const T &val)
-{
-    #pragma omp target teams distribute parallel for is_device_ptr(ptr) map(to: val)
-    for (size_t i = 0; i < n; ++i)
-        ptr[i] = val;
-}
+void init_omp(T *ptr, size_t n, const T &val);
 
 template <typename T>
-void fetch_omp(T *dest, T *src, size_t n)
-{
-    int hid = omp_get_initial_device();
-    int tid = omp_get_default_device();
-    omp_target_memcpy(dest, src, n*sizeof(T), 0, 0, hid, tid);
-}
+void fetch_omp(T *dest, T *src, size_t n);
 
 template <typename T>
-void free_omp(T *ptr)
-{
-    int dev = omp_get_default_device();
-    omp_target_free(ptr, dev);
-}
+void free_omp(T *ptr);
+
+#if defined(DEFINE_MP)
+
+#include "mp_impl.hxx"
+
+#define INSTANTIATE_MP(cpp_t) \
+template cpp_t *alloc_omp<cpp_t>(size_t n); \
+template void init_omp<cpp_t>(cpp_t *ptr, size_t n, const cpp_t &val); \
+template void fetch_omp<cpp_t>(cpp_t *dest, cpp_t *src, size_t n); \
+template void free_omp<cpp_t>(cpp_t *ptr);
+
+#endif
