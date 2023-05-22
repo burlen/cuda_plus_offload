@@ -5,10 +5,10 @@ clean:
 	rm -f cump_mp cump_cu cump_both
 
 cump_mp: main.cpp
-	clang++ -g -DCUMP_USE_OPENMP -fopenmp --offload-arch=sm_75 -ccc-print-phases -fopenmp-offload-mandatory main.cpp -o cump_mp
+	clang++ -g -DCUMP_USE_OPENMP -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory main.cpp -o cump_mp
 
 cump_cu: main.cpp
-	clang++ -g -DCUMP_USE_CUDA -x cuda --cuda-gpu-arch=sm_75 -ccc-print-phases main.cpp -o cump_cu -L/opt/nvidia/hpc_sdk/Linux_x86_64/23.3/cuda/12.0/lib64 -lcudart_static -ldl -lrt -pthread
+	clang++ -g -DCUMP_USE_CUDA -x cuda --cuda-gpu-arch=sm_75 main.cpp -o cump_cu -L/opt/nvidia/hpc_sdk/Linux_x86_64/23.3/cuda/12.0/lib64 -lcudart_static -ldl -lrt -pthread
 
 cump_both: main.cpp
 	clang++ -g -DCUMP_USE_OPENMP -DCUMP_USE_CUDA -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory -x cuda --cuda-gpu-arch=sm_75 main.cpp -o cump_both -L/opt/nvidia/hpc_sdk/Linux_x86_64/23.3/cuda/12.0/lib64 -lcudart_static -ldl -lrt -pthread -lomptarget
