@@ -2,14 +2,22 @@
 all: cump_mp cump_cu cump_both
 
 clean:
-	rm -f cump_mp cump_cu cump_both
+	rm -f cump_mp cump_cu cump_both *.o *.a
 
 cump_mp: main.cpp
-	clang++ -g -DCUMP_USE_OPENMP -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory main.cpp -o cump_mp
+	clang++ -g -DCUMP_USE_OPENMP -DDEFINE_MP -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory main.cpp -o cump_mp
 
 cump_cu: main.cpp
-	clang++ -g -DCUMP_USE_CUDA -x cuda --cuda-gpu-arch=sm_75 main.cpp -o cump_cu -L/opt/nvidia/hpc_sdk/Linux_x86_64/23.3/cuda/12.0/lib64 -lcudart_static -ldl -lrt -pthread
+	clang++ -g -DCUMP_USE_CUDA -DDEFINE_CU -x cuda --cuda-gpu-arch=sm_75 main.cpp -o cump_cu -L/opt/nvidia/hpc_sdk/Linux_x86_64/23.3/cuda/12.0/lib64 -lcudart_static -ldl -lrt -pthread
 
-cump_both: main.cpp
-	clang++ -g -DCUMP_USE_OPENMP -DCUMP_USE_CUDA -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory -x cuda --cuda-gpu-arch=sm_75 main.cpp -o cump_both -L/opt/nvidia/hpc_sdk/Linux_x86_64/23.3/cuda/12.0/lib64 -lcudart_static -ldl -lrt -pthread -lomptarget
+cu_impl.o: cu_impl.cpp
+	clang++ -x cuda --cuda-gpu-arch=sm_75 -c cu_impl.cpp -o cu_impl.o
+	ar -rcs libcu_impl.a cu_impl.o
+
+mp_impl.o: mp_impl.cpp
+	clang++ -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory -c mp_impl.cpp -o mp_impl.o
+	ar -rcs libmp_impl.a mp_impl.o
+
+cump_both: main.cpp mp_impl.o cu_impl.o
+	clang++ -g --offload-new-driver -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory -DCUMP_USE_OPENMP -DCUMP_USE_CUDA  main.cpp -o cump_both -L`pwd` -lmp_impl -lcu_impl -L/opt/nvidia/hpc_sdk/Linux_x86_64/23.3/cuda/12.0/lib64 -lcudart
 

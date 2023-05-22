@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 #endif
 
 #if defined(CUMP_USE_HIP)
-    std::cout << "running w/ hipda" << std::endl;
+    std::cout << "running w/ hip" << std::endl;
     devp = alloc_hip<float>(n);
     init_hip(devp, n, 3.14f);
     fetch_hip(vec.data(), devp, 32);
