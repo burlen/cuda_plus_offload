@@ -1,6 +1,6 @@
 ### CUDA (or HIP) and OpenMP device offloading compiled together
 Test code to see if it possible to compile both CUDA(or HIP) kernels and OpenMP
-device offload in the same program.
+device offload in the same translation unti.
 
 The main.cpp file has three sets of templated functions, one using CUDA(or HIP), one using
 OpenMP offload. Each set defines 3 functions which respectively: allocate space for an array, initialize (on the gpu) to a known value, and then fetch and print
