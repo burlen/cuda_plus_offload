@@ -1,41 +1,20 @@
-#include "hip/hip_runtime.h"
-#include <hip/hip_runtime.h>
-#include <hip/hip_runtime.h>
+#include <cstddef>
 
 template <typename T>
-T *alloc_hip(size_t n)
-{
-    T *ptr = nullptr;
-    hipError_t ierr = hipMalloc(&ptr, n*sizeof(T));
-    if (ierr != hipSuccess)
-        std::cerr << "hipMalloc failed " << hipGetErrorString(ierr)  << std::endl;
-    return ptr;
-}
+T *alloc_hip(size_t n);
 
 template <typename T>
-__global__
-void init_hip_impl(T *ptr, size_t n, T val)
-{
-    size_t i = blockIdx.x*blockDim.x + threadIdx.x;
-    if (i >= n) return;
-    ptr[i] = val;
-    //printf("ptr[%ld] = %g\n", i, ptr[i]);
-}
+void init_hip(T *ptr, size_t n, const T &val);
 
 template <typename T>
-void init_hip(T *ptr, size_t n, const T &val)
-{
-    init_hip_impl<<<n/128+1,128>>>(ptr, n, val);
-    hipError_t ierr = hipGetLastError();
-    if (ierr != hipSuccess)
-        std::cerr << "kernel launch failed " << hipGetErrorString(ierr) << std::endl;
-    hipDeviceSynchronize();
-}
+void fetch_hip(T *dest, T *src, size_t n);
 
-template <typename T>
-void fetch_hip(T *dest, T *src, size_t n)
-{
-    hipError_t ierr = hipMemcpy(dest, src, n*sizeof(T), hipMemcpyDeviceToHost);
-    if (ierr != hipSuccess)
-        std::cerr << "hipMemcpy failed " << hipGetErrorString(ierr) << std::endl;
-}  
+#if defined(DEFINE_HIP)
+#include "hip_impl.hxx"
+
+#define INSTANTIATE_HIP(cpp_t)                                          \
+template cpp_t *alloc_hip<cpp_t>(size_t n);                              \
+template void init_hip<cpp_t>(cpp_t *ptr, size_t n, const cpp_t &val);   \
+template void fetch_hip<cpp_t>(cpp_t *dest, cpp_t *src, size_t n);
+
+#endif
