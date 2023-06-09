@@ -5,7 +5,7 @@ clean:
 	rm -f cump_mp cump_cu cump_both *.o *.a
 
 cump_mp: main.cpp
-	clang++ -g -DCUMP_USE_OPENMP -DDEFINE_MP -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory main.cpp -o cump_mp
+	clang++ -g -DCUMP_USE_OPENMP -DDEFINE_MP  --offload-new-driver -fopenmp --offload-arch=sm_75 -fopenmp-offload-mandatory main.cpp -o cump_mp
 
 cump_cu: main.cpp
 	clang++ -g -DCUMP_USE_CUDA -DDEFINE_CU -x cuda --cuda-gpu-arch=sm_75 main.cpp -o cump_cu -L/opt/nvidia/hpc_sdk/Linux_x86_64/23.3/cuda/12.0/lib64 -lcudart_static -ldl -lrt -pthread
