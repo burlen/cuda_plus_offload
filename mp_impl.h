@@ -1,16 +1,17 @@
+#include "cump_config.h"
 #include <cstddef>
 
 template <typename T>
-T *alloc_omp(size_t n);
+T *alloc_omp(size_t n) CUMP_EXPORT;
 
 template <typename T>
-void init_omp(T *ptr, size_t n, const T &val);
+void init_omp(T *ptr, size_t n, const T &val) CUMP_EXPORT;
 
 template <typename T>
-void fetch_omp(T *dest, T *src, size_t n);
+void fetch_omp(T *dest, T *src, size_t n) CUMP_EXPORT;
 
 template <typename T>
-void free_omp(T *ptr);
+void free_omp(T *ptr) CUMP_EXPORT;
 
 #if defined(DEFINE_MP)
 

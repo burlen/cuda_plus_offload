@@ -1,13 +1,14 @@
+#include "cump_config.h"
 #include <cstddef>
 
 template <typename T>
-T *alloc_cu(size_t n);
+T *alloc_cu(size_t n) CUMP_EXPORT;
 
 template <typename T>
-void init_cu(T *ptr, size_t n, const T &val);
+void init_cu(T *ptr, size_t n, const T &val) CUMP_EXPORT;
 
 template <typename T>
-void fetch_cu(T *dest, T *src, size_t n);
+void fetch_cu(T *dest, T *src, size_t n) CUMP_EXPORT;
 
 #if defined(DEFINE_CU)
 #include "cu_impl.hxx"
